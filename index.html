@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitLife Gym</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        /* Light/Dark Mode Variables */
+        :root {
+            /* Light Mode Colors */
+            --bg-light: #ffffff;
+            --text-light: #111111;
+            --primary-light: #FF3366;
+            --secondary-light: #f5f5f5;
+            --accent-light: #00F0FF;
+            
+            /* Dark Mode Colors */
+            --bg-dark: #111111;
+            --text-dark: #ffffff;
+            --primary-dark: #FF3366;
+            --secondary-dark: #1a1a1a;
+            --accent-dark: #00F0FF;
+        }
+
+        /* Default Dark Theme */
+        :root {
+            --bg: var(--bg-dark);
+            --text: var(--text-dark);
+            --primary: var(--primary-dark);
+            --secondary: var(--secondary-dark);
+            --accent: var(--accent-dark);
+            --gradient: linear-gradient(135deg, #FF3366, #FF6B3D);
+        }
+
+        /* Light Theme */
+        :root[data-theme="light"] {
+            --bg: var(--bg-light);
+            --text: var(--text-light);
+            --primary: var(--primary-light);
+            --secondary: var(--secondary-light);
+            --accent: var(--accent-light);
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-toggle svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--text);
+            transition: transform 0.5s ease;
+        }
+
+        /* Mobile Menu Styles */
+        .mobile-menu {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(17, 17, 17, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            display: none;
+            justify-content: space-around;
+            z-index: 1000;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .mobile-menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-item.active {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .mobile-menu-item svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu {
+                display: flex;
+            }
+
+            /* Add padding to main content to prevent overlap with mobile menu */
+            main {
+                padding-bottom: 80px;
+            }
+        }
+
+        /* Smooth Transition for Theme Switch */
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Theme Switch Animation */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        :root {
+            --primary: #FF3366;
+            --secondary: #111111;
+            --accent: #00F0FF;
+            --text: #ffffff;
+            --gradient: linear-gradient(135deg, #FF3366, #FF6B3D);
+            --header-height: 80px;
+            --container-padding: clamp(1rem, 5vw, 2rem);
+            /* Additional Breakpoints and Device Optimizations */
+            --mobile-sm: 320px;
+            --mobile: 480px;
+            --tablet-sm: 600px;
+            --tablet: 768px;
+            --laptop: 1024px;
+            --desktop: 1200px;
+            --widescreen: 1400px;
+            --ultrawide: 1920px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--secondary);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Header & Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem 2rem;
+            background: rgba(17, 17, 17, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        nav h1 {
+            color: var(--text);
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            margin-left: 3rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section Styling */
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+                        url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            color: var(--text);
+            text-align: center;
+            padding: 0 20px;
+            margin-top: 80px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text);
+            opacity: 0;
+            animation: fadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .hero-content p {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            opacity: 0;
+            animation: fadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+        }
+
+        .hero .cta-button {
+            display: inline-block;
+            padding: 1.2rem 3.5rem;
+            background: var(--gradient);
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 20px rgba(255, 51, 102, 0.3);
+            opacity: 0;
+            animation: scaleIn 1s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                        box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .hero .cta-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(255, 51, 102, 0.4);
+        }
+
+        /* Enhanced Card Designs */
+        .feature-card,
+        .pricing-card,
+        .schedule-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2.5rem 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card::before,
+        .pricing-card::before,
+        .schedule-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 15px;
+            padding: 2px;
+            background: var(--gradient);
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .feature-card:hover::before,
+        .pricing-card:hover::before,
+        .schedule-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card:hover,
+        .pricing-card:hover,
+        .schedule-card:hover {
+            transform: 
+                translateY(-10px) 
+                rotateX(10deg) 
+                rotateY(10deg) 
+                scale(1.02);
+            box-shadow: 
+                20px 20px 60px rgba(0, 0, 0, 0.5),
+                inset -2px -2px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Hero Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Floating Animation for Hero Content */
+        .hero-content {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* Responsive Hero */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 0 1rem;
+            }
+
+            .hero-content {
+                margin-top: 60px;
+            }
+
+            .hero .cta-button {
+                padding: 1rem 2.5rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Features Section */
+        section {
+            padding: 8rem 2rem;
+        }
+
+        section h2 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 4rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(255, 51, 102, 0.2);
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0;
+            color: var(--primary);
+        }
+
+        /* Pricing Section */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(255, 51, 102, 0.2);
+        }
+
+        .price {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 1.5rem 0;
+        }
+
+        .pricing-card ul {
+            list-style: none;
+            margin: 2rem 0;
+        }
+
+        .pricing-card li {
+            margin: 1rem 0;
+        }
+
+        /* Schedule Section with Enhanced Design */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .schedule-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2.5rem 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .schedule-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 15px;
+            padding: 2px;
+            background: var(--gradient);
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .schedule-card:hover::before {
+            opacity: 1;
+        }
+
+        .schedule-card:hover {
+            transform: 
+                translateY(-10px) 
+                rotateX(10deg) 
+                rotateY(10deg) 
+                scale(1.02);
+            box-shadow: 
+                20px 20px 60px rgba(0, 0, 0, 0.5),
+                inset -2px -2px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Contact Form with Glass Effect */
+        .contact {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact form {
+            max-width: min(600px, 90%);
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: clamp(1.5rem, 3vw, 3rem);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 0 32px rgba(255, 255, 255, 0.05);
+            position: relative;
+            z-index: 1;
+        }
+
+        .contact input,
+        .contact textarea {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .contact input:focus,
+        .contact textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 
+                0 0 15px rgba(255, 51, 102, 0.1),
+                inset 0 0 10px rgba(255, 51, 102, 0.05);
+        }
+
+        /* Enhanced Schedule Section */
+        .schedule-time {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text);
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .schedule-card:hover .schedule-time {
+            transform: scale(1.1);
+            text-shadow: 0 0 20px rgba(255, 51, 102, 0.5);
+        }
+
+        .schedule-trainer {
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin: 0.5rem 0;
+            font-weight: 600;
+        }
+
+        .schedule-level {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 51, 102, 0.2);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+
+        /* Enhanced Contact Form */
+        .contact {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(
+                circle,
+                rgba(255, 51, 102, 0.1),
+                transparent 40%
+            );
+            animation: rotate 15s linear infinite;
+        }
+
+        .contact form {
+            max-width: min(600px, 90%);
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: clamp(1.5rem, 3vw, 3rem);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 0 32px rgba(255, 255, 255, 0.05);
+            position: relative;
+            z-index: 1;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .contact input,
+        .contact textarea {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .contact input:focus,
+        .contact textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 0 15px rgba(255, 51, 102, 0.2),
+                inset 0 0 10px rgba(255, 51, 102, 0.1);
+        }
+
+        .contact button {
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--gradient);
+            color: var(--text);
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .contact button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 51, 102, 0.3);
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Support for browsers without backdrop-filter */
+        @supports not (backdrop-filter: blur()) {
+            .contact form,
+            footer {
+                background: rgba(17, 17, 17, 0.95);
+            }
+        }
+
+        /* Grid Layouts */
+        .features-grid,
+        .pricing-grid,
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Section Styling */
+        section {
+            padding: 8rem 2rem;
+        }
+
+        section h2 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 4rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Schedule Specific Styles */
+        .schedule-time {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text);
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .schedule-card:hover .schedule-time {
+            transform: scale(1.1);
+            text-shadow: 0 0 20px rgba(255, 51, 102, 0.5);
+        }
+
+        .schedule-trainer {
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin: 0.5rem 0;
+            font-weight: 600;
+        }
+
+        .schedule-level {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 51, 102, 0.2);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+
+        /* Enhanced Contact Form */
+        .contact {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(
+                circle,
+                rgba(255, 51, 102, 0.1),
+                transparent 40%
+            );
+            animation: rotate 15s linear infinite;
+        }
+
+        .contact form {
+            max-width: min(600px, 90%);
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: clamp(1.5rem, 3vw, 3rem);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 0 32px rgba(255, 255, 255, 0.05);
+            position: relative;
+            z-index: 1;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .contact input,
+        .contact textarea {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .contact input:focus,
+        .contact textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 0 15px rgba(255, 51, 102, 0.2),
+                inset 0 0 10px rgba(255, 51, 102, 0.1);
+        }
+
+        /* Enhanced Button Styles */
+        .cta-button,
+        .join-button {
+            display: inline-block;
+            padding: 1.2rem 2.5rem;
+            background: var(--gradient);
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(255, 51, 102, 0.3);
+        }
+
+        .cta-button:hover,
+        .join-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 51, 102, 0.4);
+            background: linear-gradient(135deg, #FF3366, #FF6B3D);
+        }
+
+        /* Button Shine Effect */
+        .cta-button::after,
+        .join-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+        }
+
+        .cta-button:hover::after,
+        .join-button:hover::after {
+            left: 100%;
+        }
+
+        /* Enhanced Footer Design */
+        footer {
+            background: rgba(17, 17, 17, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 4rem 2rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--gradient);
+            opacity: 0.3;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-info h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .footer-info p {
+            color: var(--text);
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .footer-links a {
+            color: var(--text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .footer-links a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            transform: translateY(-50%);
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            opacity: 1;
+            transform: translateX(5px);
+        }
+
+        .footer-links a:hover::before {
+            transform: translateY(-50%) scale(1.5);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            opacity: 0.7;
+        }
+
+        /* Responsive Footer */
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .footer-links {
+                align-items: center;
+            }
+
+            .footer-links a {
+                padding-left: 0;
+            }
+
+            .footer-links a::before {
+                display: none;
+            }
+        }
+
+        /* Update Three.js canvas styling */
+        canvas.three-js-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0; /* Lower z-index to ensure content stays above */
+            opacity: 0.8; /* Slightly reduce opacity to blend better */
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+            background: transparent;
+        }
+
+        /* Responsive Container */
+        .container {
+            width: min(100% - 2rem, 1400px);
+            margin-inline: auto;
+            padding: 0 var(--container-padding);
+        }
+
+        /* Responsive Typography */
+        html {
+            font-size: clamp(14px, 1vw, 16px);
+        }
+
+        /* Mobile Navigation */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: fixed;
+                top: var(--header-height);
+                left: 0;
+                right: 0;
+                background: rgba(17, 17, 17, 0.95);
+                backdrop-filter: blur(10px);
+                padding: 2rem;
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .hamburger {
+                display: block;
+                cursor: pointer;
+            }
+
+            nav a {
+                margin-left: 0;
+                font-size: 1.1rem;
+                padding: 0.5rem;
+            }
+        }
+
+        /* Responsive Grid Layouts */
+        .features-grid,
+        .pricing-grid,
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+            gap: clamp(1rem, 3vw, 2rem);
+            padding: 0 var(--container-padding);
+        }
+
+        /* Responsive Cards */
+        .feature-card,
+        .pricing-card,
+        .schedule-card {
+            padding: clamp(1.5rem, 4vw, 2.5rem);
+        }
+
+        /* Responsive Sections */
+        section {
+            padding: clamp(4rem, 10vw, 8rem) 0;
+        }
+
+        section h2 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin-bottom: clamp(2rem, 5vw, 4rem);
+        }
+
+        /* Responsive Hero */
+        .hero {
+            min-height: 100vh;
+            padding: clamp(1rem, 5vw, 2rem);
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2rem, 6vw, 4.5rem);
+            margin-bottom: clamp(1rem, 3vw, 1.5rem);
+        }
+
+        .hero-content p {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            max-width: min(100%, 600px);
+        }
+
+        /* Responsive Buttons */
+        .cta-button,
+        .join-button {
+            padding: clamp(0.8rem, 2vw, 1.2rem) clamp(1.5rem, 4vw, 3.5rem);
+            font-size: clamp(0.9rem, 1.5vw, 1rem);
+        }
+
+        /* Responsive Footer */
+        .footer-content {
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+            gap: clamp(2rem, 5vw, 3rem);
+            padding: clamp(1rem, 3vw, 2rem);
+        }
+
+        /* Large Screen Optimizations */
+        @media (min-width: 1400px) {
+            .hero-content {
+                max-width: 1600px;
+            }
+
+            .features-grid,
+            .pricing-grid,
+            .schedule-grid {
+                max-width: 1600px;
+            }
+
+            .feature-card,
+            .pricing-card,
+            .schedule-card {
+                padding: 3rem;
+            }
+        }
+
+        /* Small Screen Optimizations */
+        @media (max-width: 480px) {
+            nav h1 {
+                font-size: 1.5rem;
+            }
+
+            .hero-content {
+                margin-top: 60px;
+            }
+
+            .pricing-card .price {
+                font-size: 2.5rem;
+            }
+
+            .schedule-time {
+                font-size: 1.5rem;
+            }
+
+            .contact form {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Three.js Canvas Responsive */
+        canvas.three-js-canvas {
+            height: 100vh;
+            height: 100svh; /* For mobile browsers */
+        }
+
+        /* Tablet Optimizations */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .features-grid,
+            .pricing-grid,
+            .schedule-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .hero-content {
+                padding: 0 clamp(2rem, 5vw, 4rem);
+            }
+        }
+
+        /* Landscape Mode */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .hero {
+                min-height: 120vh;
+            }
+
+            .hero-content {
+                margin-top: 120px;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .three-js-canvas,
+            .nav-links,
+            .cta-button {
+                display: none;
+            }
+        }
+
+        /* Enhanced Mobile Menu Animation */
+        .hamburger {
+            width: 30px;
+            height: 24px;
+            position: relative;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            display: none;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            display: block;
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background: var(--text);
+            border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+
+        .hamburger span:nth-child(1) { top: 0; }
+        .hamburger span:nth-child(2) { top: 50%; transform: translateY(-50%); }
+        .hamburger span:nth-child(3) { bottom: 0; }
+
+        .hamburger.active span:nth-child(1) {
+            transform: translateY(11px) rotate(45deg);
+            background: var(--primary);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: translateY(-11px) rotate(-45deg);
+            background: var(--primary);
+        }
+
+        /* Mobile Navigation Enhancement */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .nav-links {
+                transform: translateX(100%);
+                transition: transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+            }
+
+            .nav-links.active {
+                transform: translateX(0);
+            }
+
+            nav a {
+                opacity: 0;
+                transform: translateX(20px);
+                transition: all 0.3s ease;
+            }
+
+            .nav-links.active a {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            .nav-links.active a:nth-child(1) { transition-delay: 0.1s; }
+            .nav-links.active a:nth-child(2) { transition-delay: 0.2s; }
+            .nav-links.active a:nth-child(3) { transition-delay: 0.3s; }
+            .nav-links.active a:nth-child(4) { transition-delay: 0.4s; }
+        }
+
+        /* Ultra Small Mobile Devices */
+        @media (max-width: 320px) {
+            html { font-size: 12px; }
+            
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .cta-button {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Small Mobile Devices */
+        @media (min-width: 321px) and (max-width: 480px) {
+            html { font-size: 14px; }
+            
+            .feature-card,
+            .pricing-card,
+            .schedule-card {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Small Tablets */
+        @media (min-width: 481px) and (max-width: 600px) {
+            .features-grid,
+            .pricing-grid,
+            .schedule-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        }
+
+        /* Large Tablets */
+        @media (min-width: 601px) and (max-width: 768px) {
+            .features-grid,
+            .pricing-grid,
+            .schedule-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Small Laptops */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 0 3rem;
+            }
+        }
+
+        /* Large Laptops and Desktops */
+        @media (min-width: 1025px) and (max-width: 1200px) {
+            .container {
+                padding: 0 4rem;
+            }
+        }
+
+        /* Widescreen Displays */
+        @media (min-width: 1401px) and (max-width: 1920px) {
+            html { font-size: 18px; }
+            
+            .container {
+                max-width: 1600px;
+            }
+        }
+
+        /* 4K and Ultrawide Displays */
+        @media (min-width: 1921px) {
+            html { font-size: 20px; }
+            
+            .container {
+                max-width: 1800px;
+            }
+        }
+
+        /* Device-Specific Optimizations */
+        /* iPhone Notch Handling */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            header {
+                padding-top: calc(env(safe-area-inset-top) + 1rem);
+            }
+        }
+
+        /* Foldable Devices */
+        @media (max-width: 280px) {
+            .container {
+                padding: 0 0.5rem;
+            }
+        }
+
+        /* iPad Pro */
+        @media only screen 
+        and (min-width: 1024px) 
+        and (max-height: 1366px) 
+        and (-webkit-min-device-pixel-ratio: 1.5) {
+            .hero {
+                height: 100vh;
+                height: -webkit-fill-available;
+            }
+        }
+
+        /* Touch Device Optimizations */
+        @media (hover: none) {
+            .feature-card:hover,
+            .pricing-card:hover,
+            .schedule-card:hover {
+                transform: none;
+            }
+
+            .cta-button:active {
+                transform: scale(0.95);
+            }
+        }
+
+        /* High Contrast Mode */
+        @media (prefers-contrast: high) {
+            :root {
+                --primary: #FF0044;
+                --text: #FFFFFF;
+            }
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+        /* Enhanced Mobile Menu Styles */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .hamburger {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 100%;
+                height: 100vh;
+                height: 100dvh; /* Dynamic viewport height */
+                background: rgba(17, 17, 17, 0.98);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                justify-content: center;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                z-index: 1000;
+            }
+
+            .nav-links.active {
+                opacity: 1;
+                visibility: visible;
+                animation: menuReveal 0.6s ease-out forwards;
+            }
+
+            .nav-links a {
+                font-size: 1.5rem;
+                position: relative;
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+
+            .nav-links.active a {
+                animation: menuItemFadeIn 0.6s ease-out forwards;
+            }
+
+            .nav-links.active a:nth-child(1) { animation-delay: 0.1s; }
+            .nav-links.active a:nth-child(2) { animation-delay: 0.2s; }
+            .nav-links.active a:nth-child(3) { animation-delay: 0.3s; }
+            .nav-links.active a:nth-child(4) { animation-delay: 0.4s; }
+
+            /* Touch Feedback */
+            .nav-links a {
+                position: relative;
+                padding: 0.5rem 2rem;
+                width: 80%;
+                text-align: center;
+            }
+
+            .nav-links a::after {
+                content: '';
+                position: absolute;
+                left: 0;
+                bottom: -2px;
+                width: 100%;
+                height: 2px;
+                background: var(--gradient);
+                transform: scaleX(0);
+                transition: transform 0.3s ease;
+            }
+
+            .nav-links a:active::after {
+                transform: scaleX(1);
+            }
+        }
+
+        /* Accessibility Enhancements */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        /* Skip to main content link */
+        .skip-link {
+            position: absolute;
+            top: -100px;
+            left: 0;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            z-index: 1001;
+            transition: top 0.3s;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        /* Enhanced Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Hero Content Animations */
+        .hero-content h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text);
+            opacity: 0;
+            animation: fadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .hero-content p {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            opacity: 0;
+            animation: fadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+        }
+
+        .hero .cta-button {
+            display: inline-block;
+            padding: 1.2rem 3.5rem;
+            background: var(--gradient);
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 20px rgba(255, 51, 102, 0.3);
+            opacity: 0;
+            animation: scaleIn 1s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                        box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .hero .cta-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(255, 51, 102, 0.4);
+        }
+
+        /* Section Animations */
+        section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Card Animations */
+        .feature-card,
+        .pricing-card,
+        .schedule-card {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .feature-card.visible,
+        .pricing-card.visible,
+        .schedule-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Move the animation script here, right after the opening body tag -->
+    <script>
+        document.querySelectorAll('.schedule-card, .pricing-card, .feature-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 15;
+                const rotateY = (centerX - x) / 15;
+                
+                card.style.transform = `
+                    perspective(1000px)
+                    rotateX(${rotateX}deg)
+                    rotateY(${rotateY}deg)
+                    translateZ(30px)
+                    scale(1.02)
+                `;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0) scale(1)';
+            });
+        });
+    </script>
+
+    <!-- Wrap all content -->
+    <div class="content-wrapper">
+        <!-- Header & Navigation -->
+        <header>
+            <nav>
+                <h1>FitLife Gym</h1>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#schedule">Schedule</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#contact">Contact</a>
+                </div>
+                <button class="hamburger" aria-label="Menu" aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Transform Your Body<br>Transform Your Life</h1>
+                <p>Join FitLife Gym and experience state-of-the-art facilities, expert trainers, and a supportive community dedicated to helping you achieve your fitness goals.</p>
+                <a href="#pricing" class="cta-button">Start Your Journey</a>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features">
+            <h2>Why Choose Us</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>Expert Trainers</h3>
+                    <p>Our certified trainers are here to guide and motivate you every step of the way.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Modern Equipment</h3>
+                    <p>State-of-the-art facilities with the latest fitness technology and equipment.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Flexible Schedule</h3>
+                    <p>Open 24/7 with various class timings to fit your busy lifestyle.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Schedule Section -->
+        <section id="schedule">
+            <h2>Class Schedule</h2>
+            <div class="schedule-grid">
+                <div class="schedule-card">
+                    <h3>Morning Yoga</h3>
+                    <div class="schedule-time">6:00 AM</div>
+                    <div class="schedule-trainer">Sarah Johnson</div>
+                    <div class="schedule-level">Beginner</div>
+                    <div class="schedule-spots">15 spots left</div>
+                    <button class="join-button">Join Class</button>
+                </div>
+                <div class="schedule-card">
+                    <h3>HIIT Training</h3>
+                    <div class="schedule-time">7:30 AM</div>
+                    <div class="schedule-trainer">Mike Thompson</div>
+                    <div class="schedule-level">Advanced</div>
+                    <div class="schedule-spots">8 spots left</div>
+                    <button class="join-button">Join Class</button>
+                </div>
+                <div class="schedule-card">
+                    <h3>Strength & Conditioning</h3>
+                    <div class="schedule-time">5:30 PM</div>
+                    <div class="schedule-trainer">David Wilson</div>
+                    <div class="schedule-level">Intermediate</div>
+                    <div class="schedule-spots">12 spots left</div>
+                    <button class="join-button">Join Class</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing">
+            <h2>Membership Plans</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Basic Plan</h3>
+                    <div class="price">₹1499</div>
+                    <ul>
+                        <li>Access to Gym Floor</li>
+                        <li>Basic Equipment Usage</li>
+                        <li>Locker Room Access</li>
+                        <li>2 Group Classes/Month</li>
+                    </ul>
+                    <a href="#" class="cta-button">Choose Plan</a>
+                </div>
+                <div class="pricing-card">
+                    <h3>Pro Plan</h3>
+                    <div class="price">₹2499</div>
+                    <ul>
+                        <li>Full Gym Access</li>
+                        <li>All Equipment Access</li>
+                        <li>Personal Trainer (2 Sessions)</li>
+                        <li>Unlimited Group Classes</li>
+                    </ul>
+                    <a href="#" class="cta-button">Choose Plan</a>
+                </div>
+                <div class="pricing-card">
+                    <h3>Premium Plan</h3>
+                    <div class="price">₹3999</div>
+                    <ul>
+                        <li>24/7 Gym Access</li>
+                        <li>Premium Equipment Access</li>
+                        <li>Personal Trainer (5 Sessions)</li>
+                        <li>Nutrition Consultation</li>
+                    </ul>
+                    <a href="#" class="cta-button">Choose Plan</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact">
+            <h2>Get In Touch</h2>
+            <form>
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <textarea name="message" placeholder="Your Message" rows="6" required></textarea>
+                <button type="submit" class="cta-button">Send Message</button>
+            </form>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>FitLife Gym</h3>
+                    <p>Transform your body, transform your life.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#features">Features</a>
+                    <a href="#schedule">Schedule</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#contact">Contact</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 FitLife Gym. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // Three.js Scene Setup
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ 
+                    alpha: true, 
+                    antialias: true 
+                });
+                
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                renderer.domElement.classList.add('three-js-canvas'); // Add class to canvas
+                document.body.prepend(renderer.domElement);
+
+                // Create Smooth Waves
+                const planeGeometry = new THREE.PlaneGeometry(15, 15, 20, 20);
+                const planeMaterial = new THREE.MeshPhongMaterial({
+                    color: '#FF3366',
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.15
+                });
+                const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+                plane.rotation.x = -Math.PI / 2;
+                plane.position.y = -2;
+                scene.add(plane);
+
+                // Add Lighting
+                const pointLight = new THREE.PointLight('#FF3366', 1);
+                pointLight.position.set(0, 5, 5);
+                scene.add(pointLight);
+
+                const ambientLight = new THREE.AmbientLight('#ffffff', 0.5);
+                scene.add(ambientLight);
+
+                camera.position.z = 5;
+
+                // Smooth Scroll Variables
+                let currentScroll = 0;
+                let targetScroll = 0;
+                let ease = 0.075; // Adjust this value for smoother/faster scrolling
+
+                // Scroll Handler
+                window.addEventListener('scroll', () => {
+                    targetScroll = window.scrollY * 0.002;
+                });
+
+                // Animation Loop
+                const animate = () => {
+                    requestAnimationFrame(animate);
+
+                    // Smooth Scroll Animation
+                    currentScroll += (targetScroll - currentScroll) * ease;
+                    
+                    // Animate Wave Effect
+                    const positions = planeGeometry.attributes.position.array;
+                    const time = Date.now() * 0.0005;
+                    
+                    for(let i = 0; i < positions.length; i += 3) {
+                        const x = positions[i];
+                        const y = positions[i + 1];
+                        positions[i + 2] = Math.sin(x + time) * 0.3 + Math.sin(y + time) * 0.3;
+                    }
+                    
+                    planeGeometry.attributes.position.needsUpdate = true;
+
+                    // Camera Movement
+                    camera.position.y = -currentScroll * 2;
+                    plane.position.y = -2 - currentScroll * 2;
+
+                    renderer.render(scene, camera);
+                };
+
+                animate();
+
+                // Handle Window Resize
+                const handleResize = () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                };
+
+                window.addEventListener('resize', handleResize, false);
+
+                // Add Smooth Scroll to Links with error handling
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const targetId = this.getAttribute('href');
+                        const targetElement = document.querySelector(targetId);
+                        
+                        if (targetElement) {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        } else {
+                            console.warn(`Element with id "${targetId}" not found`);
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error('Three.js initialization error:', error);
+            }
+        });
+
+        // Add Three.js Canvas Styling
+        const style = document.createElement('style');
+        style.textContent = `
+            canvas {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 0;
+                opacity: 0.8;
+            }
+
+            body {
+                position: relative;
+            }
+
+            .content-wrapper {
+                position: relative;
+                z-index: 2;
+                background: transparent;
+            }
+
+            /* Smooth Scroll Styles */
+            html {
+                scroll-behavior: smooth;
+            }
+
+            /* Hide scrollbar but keep functionality */
+            body::-webkit-scrollbar {
+                width: 0;
+            }
+
+            /* Optional: Add custom scroll progress indicator */
+            .scroll-progress {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                background: linear-gradient(to right, #FF3366, #FF6B3D);
+                transform-origin: 0 50%;
+                transform: scaleX(0);
+                z-index: 1000;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Add scroll progress indicator
+        const progressBar = document.createElement('div');
+        progressBar.className = 'scroll-progress';
+        document.body.appendChild(progressBar);
+
+        // Update progress bar
+        window.addEventListener('scroll', () => {
+            const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = window.scrollY / totalScroll;
+            progressBar.style.transform = `scaleX(${progress})`;
+        });
+    </script>
+
+    <!-- Add Hamburger Menu for Mobile -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add skip link for accessibility
+            const skipLink = document.createElement('a');
+            skipLink.href = '#main';
+            skipLink.className = 'skip-link';
+            skipLink.textContent = 'Skip to main content';
+            document.body.prepend(skipLink);
+
+            const hamburger = document.querySelector('.hamburger');
+            const navLinks = document.querySelector('.nav-links');
+            const links = document.querySelectorAll('.nav-links a');
+
+            // Enhanced Touch Gestures
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchEndX = 0;
+            let touchEndY = 0;
+
+            const handleTouchStart = (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            };
+
+            const handleTouchMove = (e) => {
+                if (!navLinks.classList.contains('active')) return;
+                
+                touchEndX = e.touches[0].clientX;
+                touchEndY = e.touches[0].clientY;
+                
+                const deltaX = touchStartX - touchEndX;
+                const deltaY = touchStartY - touchEndY;
+
+                // Swipe right to close
+                if (deltaX < -50 && Math.abs(deltaY) < 30) {
+                    toggleMenu();
+                }
+            };
+
+            navLinks.addEventListener('touchstart', handleTouchStart, { passive: true });
+            navLinks.addEventListener('touchmove', handleTouchMove, { passive: true });
+
+            // Double tap prevention
+            let lastTap = 0;
+            document.addEventListener('touchend', (e) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                if (tapLength < 500 && tapLength > 0) {
+                    e.preventDefault();
+                }
+                lastTap = currentTime;
+            });
+
+            // Enhanced Menu Toggle
+            const toggleMenu = () => {
+                const isExpanded = hamburger.getAttribute('aria-expanded') === 'true';
+                hamburger.setAttribute('aria-expanded', !isExpanded);
+                hamburger.classList.toggle('active');
+                navLinks.classList.toggle('active');
+                
+                // Manage focus
+                if (!isExpanded) {
+                    // Trap focus in menu when open
+                    links[0].focus();
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            };
+
+            // Improved Touch Feedback
+            links.forEach(link => {
+                link.addEventListener('touchstart', () => {
+                    link.style.transform = 'scale(0.95)';
+                });
+
+                link.addEventListener('touchend', () => {
+                    link.style.transform = '';
+                });
+            });
+
+            // Enhanced Keyboard Navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+                    toggleMenu();
+                }
+
+                // Arrow key navigation in menu
+                if (navLinks.classList.contains('active')) {
+                    const activeElement = document.activeElement;
+                    const menuItems = Array.from(links);
+                    const currentIndex = menuItems.indexOf(activeElement);
+
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                        e.preventDefault();
+                        const nextIndex = (currentIndex + 1) % menuItems.length;
+                        menuItems[nextIndex].focus();
+                    }
+
+                    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        const prevIndex = (currentIndex - 1 + menuItems.length) % menuItems.length;
+                        menuItems[prevIndex].focus();
+                    }
+                }
+            });
+
+            // Performance Optimization
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    if (window.innerWidth > 768 && navLinks.classList.contains('active')) {
+                        toggleMenu();
+                    }
+                }, 250);
+            }, { passive: true });
+        });
+    </script>
+
+    <!-- Add this before closing body tag -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create Mobile Menu
+            const mobileMenu = document.createElement('nav');
+            mobileMenu.className = 'mobile-menu';
+            mobileMenu.innerHTML = `
+                <a href="#home" class="mobile-menu-item active">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span>Home</span>
+                </a>
+                <a href="#features" class="mobile-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    <span>Features</span>
+                </a>
+                <a href="#pricing" class="mobile-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Pricing</span>
+                </a>
+                <a href="#contact" class="mobile-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    <span>Contact</span>
+                </a>
+            `;
+
+            document.body.appendChild(mobileMenu);
+
+            // Mobile Menu Functionality
+            const menuItems = document.querySelectorAll('.mobile-menu-item');
+            
+            menuItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // Smooth scroll to section
+                    e.preventDefault();
+                    const targetId = item.getAttribute('href');
+                    document.querySelector(targetId).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Update active menu item on scroll
+            window.addEventListener('scroll', () => {
+                const sections = document.querySelectorAll('section');
+                let current = '';
+
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (window.pageYOffset >= sectionTop - 60) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                menuItems.forEach(item => {
+                    item.classList.remove('active');
+                    if (item.getAttribute('href').slice(1) === current) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- Intersection Observer for scroll animations -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                threshold: 0.2,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe sections
+            document.querySelectorAll('section').forEach(section => {
+                observer.observe(section);
+            });
+
+            // Observe cards
+            document.querySelectorAll('.feature-card, .pricing-card, .schedule-card').forEach(card => {
+                observer.observe(card);
+            });
+
+            // Add stagger effect to cards
+            document.querySelectorAll('.features-grid, .pricing-grid, .schedule-grid').forEach(grid => {
+                const cards = grid.children;
+                Array.from(cards).forEach((card, index) => {
+                    card.style.transitionDelay = `${index * 0.1}s`;
+                });
+            });
+        });
+    </script>
+
+    <!-- Smooth scroll enhancement -->
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
